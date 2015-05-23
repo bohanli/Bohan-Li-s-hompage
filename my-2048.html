@@ -39,29 +39,29 @@ My2048.prototype =
 		tile.setAttribute('val', val);
 		tile.innerHTML = val > 0? val : '';
 		if( val == 0 )
-			tile.setAttribute('style', "background: #e6e6fa");
+			tile.setAttribute('style', "background: #d3d7d4");
 		else if( val == 2 )
-			tile.setAttribute('style', "background: #d8bfd8");
+			tile.setAttribute('style', "background: #b2d235");
 		else if( val == 4 )
-			tile.setAttribute('style', "background: #dda0dd");
+			tile.setAttribute('style', "background: #7fb80e");
 		else if( val == 8 )
-			tile.setAttribute('style', "background: #ee82ee");
+			tile.setAttribute('style', "background: #1d953f");
 		else if( val == 16 )
-			tile.setAttribute('style', "background: #da70d6");
+			tile.setAttribute('style', "background: #007d65");
 		else if( val == 32 )
-			tile.setAttribute('style', "background: #ff00ff");
+			tile.setAttribute('style', "background: #225a1f");
 		else if( val == 64 )
-			tile.setAttribute('style', "background: #ba55d3");
+			tile.setAttribute('style', "background: #008792");
 		else if( val == 128 )
-			tile.setAttribute('style', "background: #9400d3");
+			tile.setAttribute('style', "background: #1b315e");
 		else if( val == 256 )
-			tile.setAttribute('style', "background: #8b008b");
+			tile.setAttribute('style', "background: #401c44");
 		else if( val == 512 )
-			tile.setAttribute('style', "background: #483d8b");
+			tile.setAttribute('style', "background: #ef5b9c");
 		else if( val == 1024 )
-			tile.setAttribute('style', "background: #4b0082");
+			tile.setAttribute('style', "background: #bd6758");
 		else if( val == 2048 )
-			tile.setAttribute('style', "background: #191970");
+			tile.setAttribute('style', "background: #ed1941");
 
 		return tile;
 	},
@@ -226,7 +226,7 @@ window.onkeydown = function(e)
 	width: 500px;
 	height: 500px;
 	margin: auto; /* center */
-	background-color: #ffeeff; 
+	background-color: #f6f5ec; 
 }
 
 #startButton
@@ -234,7 +234,7 @@ window.onkeydown = function(e)
 	/* object style */
 	width: 500px;
 	height: 500px;
-	background-color: #cca0d2;
+	background-color: #008792;
 
 	/* word style */
 	font-size: 25px;
