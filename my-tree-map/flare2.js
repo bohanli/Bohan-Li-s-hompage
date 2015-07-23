@@ -196,7 +196,7 @@ var flare =
     {name: "TimeScale", size: 5833}
    ]
   },
-/*   {
+  {
    name: "util",
    children: [
     {name: "Arrays", size: 8258},
@@ -241,7 +241,7 @@ var flare =
     {name: "Strings", size: 22026}
    ]
   },
- {
+  {
    name: "vis",
    children: [
     {
@@ -376,6 +376,6 @@ var flare =
     },
     {name: "Visualization", size: 16540}
    ]
-  }*/
+  }
  ]
 }
