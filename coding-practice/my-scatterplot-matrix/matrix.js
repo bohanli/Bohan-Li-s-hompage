@@ -126,6 +126,8 @@ Matrix.prototype =
 		var selectPos1 = {};
 		var selectPos2 = {};
 
+		var _this = this;
+
 		$("#disp").mousedown(function(e){
 			var pos = jQuery(this).offset();
 			var p = {};
@@ -157,7 +159,7 @@ Matrix.prototype =
 
 		})
 
-		$("#disp").mouseover(function(e){
+		$("#disp").mousemove(function(e){
 			var pos = jQuery(this).offset();
 			var p = {};
 
@@ -230,6 +232,47 @@ Matrix.prototype =
 			selctRect.setAttribute("fill-opacity", 0.3);
 			disp.appendChild(selctRect);
 
+
+			for( var k = 0; k < _this.dataSet.length; k++ )
+			{
+				var plot = document.getElementById("plot"+selectedPair.i+","+selectedPair.j+","+k);
+				//console.log(plot)
+
+				cx = parseFloat(plot.getAttribute("cx"))+100+(selectedPair.i-1)*(tileSize+tileInterval);
+				cy = parseFloat(plot.getAttribute("cy"))+50 + (selectedPair.j-1)*(tileSize+tileInterval);
+				console.log(cx, cy)
+				console.log(x1, y1, x2, y2)
+				console.log(x1 <= cx && cx <= x2 && y1 <= cy && cy <= y2)
+				if( x1 <= cx && cx <= x2 && y1 <= cy && cy <= y2 )
+				{
+					for( var i = 1; i < _this.dims.length ; i++ )
+					{
+						for( var j = 1; j < _this.dims.length ; j++ )
+						{
+							var plot2 = document.getElementById("plot"+i+","+j+","+k);
+							if( _this.dataSet[k][0] == "setosa")
+								var fillColor = "#aa2116";
+							else if( dataSet[k][0] == "versicolor")
+								var fillColor = "#1d953f";
+							else if( dataSet[k][0] == "virginica")
+								var fillColor = "#2b4490";
+
+							plot2.setAttribute("fill", fillColor);
+						}
+					}
+				}
+				else
+				{
+					for( var i = 1; i < _this.dims.length ; i++ )
+					{
+						for( var j = 1; j < _this.dims.length ; j++ )
+						{
+							var plot2 = document.getElementById("plot"+i+","+j+","+k);
+							plot2.setAttribute("fill", "#8a8c8e");
+						}
+					}
+				}
+			}
 		})
 
 		$("#disp").mouseup(function(e){
