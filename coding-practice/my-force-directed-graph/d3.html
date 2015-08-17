@@ -30,6 +30,8 @@
   var force = d3.layout.force()
     .size([width, height])
     .linkDistance(30)
+    .linkStrength(1)
+    .friction(0.8)
     .charge(-1200)
 
   d3.json("dataset.json", function(graph) {
