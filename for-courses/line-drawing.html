@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset = "utf-8"/>
+<script src = "jquery.js"></script>
+<title>Implement Line Drawing Algorithms by Javascript</title>
+</head>
+<body>
+<h1>Comparison between line-drawing algorithms</h1>
+<h2>李博涵 Bohan Li 3130103371</h2>
+<form>
+<p>Naive Rounding Method</p>
+  <input type="radio" name="reference" id="ref-1" checked>
+  <label for="ref-1" name="reference">3x-y+1=0</label><br>
+  <input type="radio" name="reference" id="ref-2">
+  <label for="ref-2" name="reference">x-2y+3=0</label><br>
+<p>DDA</p>
+  <input type="radio" name="reference" id="ref-3">
+  <label for="ref-3" name="reference">3x-y+1=0</label><br>
+  <input type="radio" name="reference" id="ref-4">
+  <label for="ref-4" name="reference">x-2y+3=0</label><br>
+<p>Bresenham</p>
+  <input type="radio" name="reference" id="ref-5">
+  <label for="ref-5" name="reference">3x-y+1=0</label><br>
+  <input type="radio" name="reference" id="ref-6">
+  <label for="ref-6" name="reference">x-2y+3=0</label><br>
+</form>
+
+<script>
+function clearPixels()
+{
+	for( var x = 0; x < dispWidth; x += delta )
+	{
+		for( var y = 0; y < dispHeight; y += delta )
+		{
+			var tile = document.getElementById("rect"+x/delta+","+y/delta);
+			tile.setAttribute("fill", "black");
+		}
+	}	
+}
+
+function naive(a, b, c, x1, x2)
+{
+	// for ax+by+c=0, a, b, c are non-zero
+	// draw line from (x1,y1) to (x2,y2)
+
+	clearPixels();
+
+	k = -a/b;
+	m = -c/b;
+	for( var x = x1; x < x2; x++ )
+	{
+		y = k*x + m;
+		y = Math.round(y);
+		var tile = document.getElementById("rect"+x+","+y);
+		tile.setAttribute("fill", "red");
+	}
+}
+
+function dda(a, b, c, x1, x2)
+{
+	// for ax+by+c=0, a, b, c are non-zero
+	// draw line from (x1,y1) to (x2,y2)
+
+	clearPixels();
+
+	if( Math.abs(a) < Math.abs(b) )
+	{
+		k = -a/b;
+		m = -c/b;
+		yp = k*x1 + m;
+		y = Math.round(yp);
+
+		var tile = document.getElementById("rect"+x1+","+y);
+		tile.setAttribute("fill", "red");
+		for( var x = x1 + 1; x < x2; x++ )
+		{
+			yp = yp + k;
+			y = Math.round(yp);
+			tile = document.getElementById("rect"+x+","+y);
+			tile.setAttribute("fill", "red");
+		}		
+	}
+	else
+	{
+		k = -a/b;
+		m = -c/b;
+		y1 = k*x1 + m;
+		y1 = Math.round(y1);
+		y2 = k*x2 + m;
+		y2 = Math.round(y2);
+		
+		k = -b/a;
+		m = -c/a;
+		xp = x1;
+
+		var tile = document.getElementById("rect"+x1+","+y1);
+		tile.setAttribute("fill", "red");
+		for( var y = y1 + 1; y < y2; y++ )
+		{
+			xp = xp + k;
+
+			x = Math.round(xp);
+			tile = document.getElementById("rect"+x+","+y);
+			tile.setAttribute("fill", "red");
+		}			
+	}
+
+}
+
+function bresenham(a, b, c, x1, x2)
+{
+	// for ax+by+c=0, a, b, c are non-zero
+	// draw line from (x1,y1) to (x2,y2)
+
+	clearPixels();
+
+	k = -a/b;
+	m = -c/b;
+	y1 = k*x1 + m;
+	y1 = Math.round(y1);
+	y2 = k*x2 + m;
+	y2 = Math.floor(y2);
+	dx = x2 - x1;
+	dy = y2 - y1;
+
+	tile = document.getElementById("rect"+x1+","+y1);
+	tile.setAttribute("fill", "red");
+
+	if( Math.abs(a) < Math.abs(b) )
+	{
+		p = 2*dy - dx;
+		y = y1;
+		for( var x = x1+1; x < x2; x++ )
+		{
+			if( p < 0 )
+				p = p + 2*dy;
+			else
+				p = p + 2*dy - 2*dx;
+
+			if( p >= 0 )
+				y++;
+
+			tile = document.getElementById("rect"+x+","+y);
+			tile.setAttribute("fill", "red");
+		}		
+	}
+	else
+	{
+		p = 2*dx - dy;
+		x = x1;
+		for( var y = y1+1; y < y2; y++ )
+		{
+			if( p < 0 )
+				p = p + 2*dx;
+			else
+				p = p + 2*dx - 2*dy;
+
+			if( p >= 0 )
+				x++;
+
+			tile = document.getElementById("rect"+x+","+y);
+			tile.setAttribute("fill", "red");
+		}				
+	}
+}
+
+dispWidth = 600;
+dispHeight = 600;
+delta = 10;
+
+var disp = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+disp.setAttribute("id", "disp");
+disp.setAttribute("x", "10");
+disp.setAttribute("y", "20");
+disp.setAttribute("width", dispWidth);
+disp.setAttribute("height", dispHeight);
+document.body.appendChild(disp);
+
+for( var x = 0; x < dispWidth; x += delta )
+{
+	for( var y = 0; y < dispHeight; y += delta )
+	{
+		var tile = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+		tile.setAttribute("id", "rect"+x/delta+","+y/delta);
+		tile.setAttribute("x", x);
+		tile.setAttribute("y", y);
+		tile.setAttribute("width", delta);
+		tile.setAttribute("height", delta);
+		tile.setAttribute("stroke", "#999d9c");
+		disp.appendChild(tile);			
+	}
+}
+
+naive(3, -1, 1, 0, 19);
+
+$("[name]=reference").click(function(e){
+	if( document.getElementById("ref-1").checked ){
+		naive(3, -1, 1, 0, 19);
+	}
+	else if( document.getElementById("ref-2").checked ){
+		naive(1, -2, 3, 0, 60);
+	}
+	else if( document.getElementById("ref-3").checked ){
+		dda(3, -1, 1, 0, 19);
+	}
+	else if( document.getElementById("ref-4").checked ){
+		dda(1, -2, 3, 0, 60);
+	}
+	else if( document.getElementById("ref-5").checked ){
+		bresenham(3, -1, 1, 0, 19);
+	}
+	else if( document.getElementById("ref-6").checked ){
+		bresenham(1, -2, 3, 0, 60);
+	}
+})
+
+
+</script>
+</body>
+</html>

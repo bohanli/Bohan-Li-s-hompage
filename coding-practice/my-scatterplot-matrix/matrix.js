@@ -275,6 +275,28 @@ Matrix.prototype =
 			}
 		})
 
+		this.timer = setInterval(function(){
+				_this.thetaAnnulus += dThetaAnnulus;
+				_this.thetaSun += dThetaSun;
+				_this.thetaPlanet += dThetaPlanets;
+				_this.thetaPlanets += dThetaPlanet;	
+				annulusG = document.getElementById("annulus");
+				annulusG.setAttribute("transform", "rotate("+_this.thetaAnnulus+")");
+
+				sunG = document.getElementById("sun");
+				sunG.setAttribute("transform", "rotate("+_this.thetaSun+")");
+
+				planetsG = document.getElementById("planets");
+				planetsG.setAttribute("transform", "rotate("+_this.thetaPlanet+")");
+				for( var i = 0; i < 3; i++ )
+				{
+					planetG = document.getElementById("planet"+i);
+					planetG.setAttribute("transform", "rotate("+_this.thetaPlanets+")");					
+				}
+
+				t++;
+			},this.timeInterval);
+
 		$("#disp").mouseup(function(e){
 			var pos = jQuery(this).offset();
 			var p = {};
