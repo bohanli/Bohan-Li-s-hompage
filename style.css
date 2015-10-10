@@ -30,7 +30,7 @@ a:hover.more-link {
 /* Headers */
 h1, h2, h3, h4 {
 	font-weight: bold;
-	font-family: Georgia, 'Times New Roman', Times, serif, STKaiti, Kaiti; 
+	font-family: Georgia, 'Times New Roman', Times, serif, simsun; 
 	color: #000;
 	margin: 10px 10px 7px 10px;	 
 }
