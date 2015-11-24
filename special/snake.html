@@ -15,6 +15,10 @@
 
 <script>
 
+/*
+
+*/
+
 
 function Game(params)
 {
@@ -43,11 +47,11 @@ Game.prototype =
 
 		// initial snake
 		var head = this.head;
-		head.index = ( 15 + Math.floor( Math.random() * 20 ) ) * 50 + 15 + Math.floor( Math.random() * 20 );
+		head.index = ( 10 ) * 50  + 10;
 		head.x = Math.floor( head.index % 50 );
 		head.y = Math.floor( head.index / 50 );
 
-		for(var i = 4; i > 0; i-- )
+		for(var i = 19; i > 0; i-- )
 		{
 			var index = head.index + i;
 			this.snake.push(index);
@@ -150,8 +154,8 @@ Game.prototype =
 		var index = fruit.x + fruit.y * 50;
 		while( this.tiles[index] == 1)
 		{
-			fruit.x = 10 + Math.floor( Math.random() * 10 );
-			fruit.y = 10 + Math.floor( Math.random() * 10 );
+			fruit.x -= 1;
+			fruit.y -= 1;
 			var index = fruit.x + fruit.y * 50;			
 		}
 		this.tiles[index] = 1;
@@ -198,7 +202,7 @@ var timerId;
 
 window.onload = function()
 {
-	var interval = 5;
+	var interval = 2;
 	var cycle = Math.floor( 1000 / interval );
 	var canvas = document.getElementById("myCanvas");
 	var ctx = this.ctx = canvas.getContext("2d");
