@@ -166,13 +166,8 @@ var IlpSolver = {
 		//  st  A.x = b
 		//      l <= x <= u
 
-		log = [];
-
 		var BASIS = 0, NONBASIS_L = +1, NONBASIS_U = -1;
-
-		A = model.A; b = model.b; c = model.c;
-		m = model.m; n = model.n;
-		xLB = model.xLB; xUB = model.xUB;
+		A = model.A; b = model.b; c = model.c; m = model.m; n = model.n; xLB = model.xLB; xUB = model.xUB;
 
 		var xStat = new Array(n + m);
 		var basisVars = new Array(m);
@@ -220,7 +215,7 @@ var IlpSolver = {
 					z += c[i] * x[i];
 				model.z = z;
 				model.x = x;
-				console.log("break")
+				//console.log("break")
 				break;
 			}
 
@@ -245,6 +240,7 @@ var IlpSolver = {
 				s = i; 
 			}
 
+			//console.log("minRC", minRC)
 			// if no entering variable
 			if( s == -1 ) {
 				if( isStageOne ) {
@@ -254,7 +250,7 @@ var IlpSolver = {
 
 					if ( z > this.ZERO ) {
 						model.status = this.INFEASIBLE;
-						console.log("break")
+						//console.log("break")
 						break;
 					} else { // state two
 						isStageOne = false;
@@ -269,7 +265,7 @@ var IlpSolver = {
 						z += c[i] * x[i];
 					model.z = z;
 					model.x = x;
-					console.log("break")
+					//console.log("break")
 					break;
 				}
 			}
@@ -290,6 +286,14 @@ var IlpSolver = {
 				r = -1;
 				rIsEV = true;
 			}
+
+
+			// for( i = 0; i < m; i++ ) {
+
+			// 	if( -1*xStat[s]*BinvAs[i] > +this.ZERO ) { 
+				
+			// 	}
+			// }
 
 			for( i = 0; i < m; i++ ) {
 				j = basisVars[i];
@@ -316,7 +320,7 @@ var IlpSolver = {
 				
 			if( minRatio >= Infinity ) {
 				if ( !isStageOne ) model.status = this.UNBOUNDED;
-				console.log("break")
+				//console.log("break")
 				break;
 			}
 			
@@ -338,7 +342,7 @@ var IlpSolver = {
 					Binv[r][j] /= erBinvAs;
 
 				xStat[s] = BASIS;
-				if ( basisVars[r] < n ) {
+				if( basisVars[r] < n ) {
 					if ( Math.abs(x[basisVars[r]] - xLB[basisVars[r]]) < this.ZERO ) xStat[basisVars[r]] = NONBASIS_L;
 					if ( Math.abs(x[basisVars[r]] - xUB[basisVars[r]]) < this.ZERO ) xStat[basisVars[r]] = NONBASIS_U;
 				} else {
