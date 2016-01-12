@@ -1,98 +1,163 @@
 var IlpSolver = {
 	// some constants 
-	INFEASIBLE: 0, OPTIMAL: 1, UNBOUNDED: 2, MAXITERATIONS: Infinity,
+	INFEASIBLE: 0, OPTIMAL: 1, UNBOUNDED: 2, MAXITERATIONS: 100,  ZERO: 0.000001, INF: 10000000,
 
 	solveILP: function(ILPModel) {
 		//  min cx
 		//  s.t.  Ax = b
 		//      x are non-negtive integers
 
-		var maxNodes = Infinity, log = [];
-		var currentBest = Infinity, currentBestX = new Array(ILPModel.n); // current OPT
+		var currentBest = this.INF, currentBestX = new Array(ILPModel.n); // current OPT
 		var mostFracIndex, mostFracValue, fracValue; // most fractional value
-
+		var log = [];
 		
 		/* branch & bound tree */
 		// init the branch & bound tree
 		var unsolvedLPs = new Array();
 		ILPModel.solved = false;
 		unsolvedLPs.push(ILPModel);
-		var nodeCount = 0;
+		var nodeCnt = 0;
 
 		// specify ILPModel
 		var n = ILPModel.n;
 		ILPModel.xLB = new Array(n);
 		ILPModel.xUB = new Array(n);
-		ILPModel.xINT = new Array(n); 
+		//ILPModel.xINT = new Array(n); 
 		for( i = 0; i < n; i++ ) ILPModel.xLB[i] = 0;
-		for( i = 0; i < n; i++ ) ILPModel.xUB[i] = Infinity;
-		for( i = 0; i < n; i++ ) ILPModel.xINT[i] = true;
+		for( i = 0; i < n; i++ ) ILPModel.xUB[i] = this.INF;
+		//for( i = 0; i < n; i++ ) ILPModel.xINT[i] = true;
+		console.log(ILPModel);
+		console.log("test");
 
 		// iteratively process unsolved nodes on the branch & bound tree (BFS)
-		while ( unsolvedLPs.length >= 1 ) {
-			nodeCount += 1;
+		while( unsolvedLPs.length >= 1 ) {
+			nodeCnt += 1;
 			model = unsolvedLPs.shift();
 			
-			// stop if nodeCount >= maxNodes
-			if ( nodeCount >= maxNodes ) {
+			// stop if nodeCnt >= MAXITERATIONS
+			if( nodeCnt >= this.MAXITERATIONS ) {
 				unsolvedLPs = [];
-				ILPModel.status = IlpSolver.INFEASIBLE;
+				ILPModel.status = this.INFEASIBLE;
 				console.log("No solution!");
 				return;
 			}
 			
 			// solve the LP at this node
-			IlpSolver.solveLP(model);
-			if ( model.status == IlpSolver.INFEASIBLE )
+			console.log("=========================")
+			console.log("unsolvedLPs", unsolvedLPs.length)
+			console.log("model.old.xLB", model.xLB)
+			console.log("model.old.xUB", model.xUB)
+			this.solveLP(model);
+			if( model.status == this.INFEASIBLE ) {
 				continue;
-			
+			}
+				
+			console.log(model.x)
+
 			// compare with current OPT
-			if ( model.z > currentBest )
+			console.log("model.z", model.z)
+			console.log("currentBest", currentBest)
+			if( model.z > currentBest )
 				continue;
+
+			console.log("model.z", model.z)
 			
 			// check each value of the LP solution
+
+			
+			console.log("model", model)
 			mostFracIndex = -1, mostFracValue = 0;
-			for ( i = 0; i < model.n; i++ ) if (Math.abs(Math.floor(model.x[i]) - model.x[i]) > 0.0001) {
-				// most fractional value 
-				fracValue = Math.min( Math.abs(Math.floor(model.x[i]) - model.x[i]), Math.abs(Math.ceil (model.x[i]) - model.x[i]));
-				if (fracValue > mostFracValue) { mostFracIndex = i, mostFracValue = fracValue; }
+			for( i = 0; i < model.n; i++ ) {
+				if( model.x[i] < model.xLB[i] || model.x[i] > model.xUB[i] ) {
+					continue;
+				}
+
+
+				console.log("model.x["+i+"]", model.x[i])
+				console.log("Math.abs(Math.floor(model.x[i]) - model.x[i])", Math.abs(Math.floor(model.x[i]) - model.x[i]))
+				if( Math.abs(Math.floor(model.x[i]) - model.x[i]) > this.ZERO ) {
+					// most fractional value 
+					//console.log("fuck")
+
+					fracValue = Math.min( Math.abs(Math.floor(model.x[i]) - model.x[i]), Math.abs(Math.ceil (model.x[i]) - model.x[i]));
+					if( fracValue > mostFracValue ) {
+						//console.log("fracValue", fracValue)
+						mostFracIndex = i;
+						mostFracValue = fracValue; 
+					}
+				}
+
 			}
 			
+			console.log("mostFracIndex", mostFracIndex)
+
 			// check whether a fractional value is found
-			if ( mostFracIndex == -1 ) {
+			if( mostFracIndex == -1 ) {
 				// if no fractional value found, terminate the branch and update current OPT
-				if ( model.z < currentBest ) {
+				console.log("if( mostFracIndex == -1 ) ", model.z);
+				if( model.z < currentBest && Math.abs(Math.floor(model.z) - model.z) < this.ZERO) {
+					console.log("currentBest", currentBest)
+					console.log("currentBestX", currentBestX)
 					currentBest = model.z;
-					for ( i = 0; i < model.n; i++ )
+					for( i = 0; i < model.n; i++ )
 						currentBestX[i] = model.x[i];
+					console.log("NEW currentBest", currentBest)
+					console.log("NEW currentBestX", currentBestX)
 				}
-			} else {
+			} else if( model.z < currentBest ) {
+
+				console.log("model xLB[mostFracIndex]", model.xLB[mostFracIndex])
+				console.log("model xUB[mostFracIndex]", model.xUB[mostFracIndex])
+
 				// if some fractional value found, do branching again on this node
 				// lower branch
-				newBranch1 = IlpSolver.copyModel(model);
-				newBranch1.xUB[mostFracIndex] = Math.floor(newBranch1.x[mostFracIndex])
-				newBranch1.z = model.z;
-				unsolvedLPs.push(newBranch1);
+				newBranch1 = this.copyModel(model);
+				newBranch1.xUB[mostFracIndex] = Math.floor(model.x[mostFracIndex])
+
+
+				console.log("lower branch xLB[mostFracIndex]", newBranch1.xLB[mostFracIndex])
+				console.log("lower branch xUB[mostFracIndex]", newBranch1.xUB[mostFracIndex])
+				// newBranch1.z = model.z;
+				if( newBranch1.xLB[mostFracIndex] <= newBranch1.xUB[mostFracIndex]  )
+					unsolvedLPs.push(newBranch1);
 				
-				// higher branch
-				newBranch2 = IlpSolver.copyModel(model);
-				newBranch2.xLB[mostFracIndex] = Math.ceil(newBranch2.x[mostFracIndex])
-				newBranch2.z = model.z;
-				unsolvedLPs.push(newBranch2);
+				// upper branch
+				newBranch2 = this.copyModel(model);
+				newBranch2.xLB[mostFracIndex] = Math.ceil(model.x[mostFracIndex])
+
+				// if( newBranch2.xLB[mostFracIndex] > newBranch2.xUB[mostFracIndex] )
+				// 	break;
+
+				console.log("upper branch xLB[mostFracIndex]", newBranch2.xLB[mostFracIndex])
+				console.log("upper branch xUB[mostFracIndex]", newBranch2.xUB[mostFracIndex])
+				// newBranch2.z = model.z;
+				if( newBranch2.xLB[mostFracIndex] <= newBranch2.xUB[mostFracIndex]  )
+					unsolvedLPs.push(newBranch2);
 			}
 		}
 	
 		// check whether there is an OPT
-		ILPModel.nodeCount = nodeCount;
-		if (currentBest < Infinity) {
+		this.nodeCnt = nodeCnt;
+		if( currentBest < this.INF ) {
 			ILPModel.x = currentBestX;
 			ILPModel.z = currentBest;
-			ILPModel.status = IlpSolver.OPTIMAL;
+			ILPModel.status = this.OPTIMAL;
 			console.log("Done!");
 		} else {
-			ILPModel.status = IlpSolver.INFEASIBLE;
+			ILPModel.status = this.INFEASIBLE;
 			console.log("No solution!");
 		}
+
+		for( i = 0; i < ILPModel.n; i++ ) 
+				ILPModel.x[i] = Math.floor(ILPModel.x[i]);
+
+		// for( i = 0; i < ILPModel.n; i++ ) {
+		// 	if( Math.abs(Math.floor(ILPModel.x[i]) - ILPModel.x[i]) > this.ZERO ) {
+		// 		ILPModel.x[i] = Math.floor(ILPModel.x[i]);
+		// 	}
+
+		// }
+
 	},
 
 
@@ -103,7 +168,7 @@ var IlpSolver = {
 
 		log = [];
 
-		var BASIS = 0, NONBASIS_L = +1, NONBASIS_U = -1, ZERO = 0.000001;
+		var BASIS = 0, NONBASIS_L = +1, NONBASIS_U = -1;
 
 		A = model.A; b = model.b; c = model.c;
 		m = model.m; n = model.n;
@@ -149,12 +214,13 @@ var IlpSolver = {
 		var isStageOne = true, iter = 0;
 		while ( true ) {
 			iter++;
-			if ( iter >= IlpSolver.MAXITERATIONS ) {
+			if ( iter >= this.MAXITERATIONS ) {
 				z = 0.0;
 				for (i = 0; i < n; i++)
 					z += c[i] * x[i];
 				model.z = z;
 				model.x = x;
+				console.log("break")
 				break;
 			}
 
@@ -173,21 +239,22 @@ var IlpSolver = {
 			}
 
 			// pick entering variable
-			var minRC = -ZERO, s = -1;
+			var minRC = -this.ZERO, s = -1;
 			for ( i = 0; i < n; i++ ) if ( xStat[i] * rc[i] < minRC ) { 
 				minRC = xStat[i] * rc[i];
 				s = i; 
 			}
 
 			// if no entering variable
-			if ( s == -1 ) {
-				if ( isStageOne ) {
+			if( s == -1 ) {
+				if( isStageOne ) {
 					z = 0.0;
 					for ( i = 0; i < m; i++ )
 						z += Cb[i] * x[basisVars[i]];
 
-					if ( z > ZERO ) {
-						model.status = IlpSolver.INFEASIBLE;
+					if ( z > this.ZERO ) {
+						model.status = this.INFEASIBLE;
+						console.log("break")
 						break;
 					} else { // state two
 						isStageOne = false;
@@ -196,18 +263,19 @@ var IlpSolver = {
 						continue;
 					}
 				} else {
-					model.status = IlpSolver.OPTIMAL;
+					model.status = this.OPTIMAL;
 					z = 0.0;
-					for (i = 0; i < n; i++)
+					for(i = 0; i < n; i++)
 						z += c[i] * x[i];
 					model.z = z;
 					model.x = x;
+					console.log("break")
 					break;
 				}
 			}
 			
 			// calculate BinvAs
-			for ( i = 0; i < m; i++ ) {
+			for( i = 0; i < m; i++ ) {
 				BinvAs[i] = 0.0;
 				for ( k = 0; k < m; k++ )
 					BinvAs[i] += Binv[i][k] * A[k][s];
@@ -217,18 +285,18 @@ var IlpSolver = {
 			var minRatio = Infinity, ratio = 0.0, r = -1;
 			var rIsEV = false;
 			ratio = xUB[s] - xLB[s];
-			if ( ratio <= minRatio ) {
+			if( ratio <= minRatio ) {
 				minRatio = ratio;
 				r = -1;
 				rIsEV = true;
 			}
 
-			for ( i = 0; i < m; i++ ) {
+			for( i = 0; i < m; i++ ) {
 				j = basisVars[i];
 				var jLB = (j >= n) ? 0.0 : xLB[j];
 				var jUB = (j >= n) ? Infinity : xUB[j];
 
-				if ( -1*xStat[s]*BinvAs[i] > +ZERO ) { 
+				if( -1*xStat[s]*BinvAs[i] > +this.ZERO ) { 
 					ratio = (x[j] - jUB) / (xStat[s]*BinvAs[i]);
 					if ( ratio <= minRatio ) { 
 						minRatio = ratio; 
@@ -236,7 +304,7 @@ var IlpSolver = {
 						rIsEV = false; 
 					}
 				}
-				if ( +1*xStat[s]*BinvAs[i] > +ZERO ) {
+				if( +1*xStat[s]*BinvAs[i] > +this.ZERO ) {
 					ratio = (x[j] - jLB) / (xStat[s]*BinvAs[i]);
 					if ( ratio <= minRatio ) { 
 						minRatio = ratio; 
@@ -246,35 +314,36 @@ var IlpSolver = {
 				}
 			}
 				
-			if ( minRatio >= Infinity ) {
-				if ( !isStageOne ) model.status = IlpSolver.UNBOUNDED;
+			if( minRatio >= Infinity ) {
+				if ( !isStageOne ) model.status = this.UNBOUNDED;
+				console.log("break")
 				break;
 			}
 			
 			// update solution and basis
 			x[s] += xStat[s] * minRatio;
-			for ( i = 0; i < m; i++ )
+			for( i = 0; i < m; i++ )
 				x[basisVars[i]] -= xStat[s] * minRatio * BinvAs[i];
 
-			if ( !rIsEV ) {
+			if( !rIsEV ) {
 				var erBinvAs = BinvAs[r];
 
-				for ( i = 0; i < m; i++ ) if (i != r) {
+				for( i = 0; i < m; i++ ) if (i != r) {
 					var eiBinvAsOvererBinvAs = BinvAs[i] / erBinvAs;
 					for ( j = 0; j < m; j++ ) 
 						Binv[i][j] -= eiBinvAsOvererBinvAs * Binv[r][j]
 				}
 
-				for ( j = 0; j < m; j++ )
+				for( j = 0; j < m; j++ )
 					Binv[r][j] /= erBinvAs;
 
 				xStat[s] = BASIS;
 				if ( basisVars[r] < n ) {
-					if ( Math.abs(x[basisVars[r]] - xLB[basisVars[r]]) < ZERO ) xStat[basisVars[r]] = NONBASIS_L;
-					if ( Math.abs(x[basisVars[r]] - xUB[basisVars[r]]) < ZERO ) xStat[basisVars[r]] = NONBASIS_U;
+					if ( Math.abs(x[basisVars[r]] - xLB[basisVars[r]]) < this.ZERO ) xStat[basisVars[r]] = NONBASIS_L;
+					if ( Math.abs(x[basisVars[r]] - xUB[basisVars[r]]) < this.ZERO ) xStat[basisVars[r]] = NONBASIS_U;
 				} else {
-					if ( Math.abs(x[basisVars[r]] - 0.00000) < ZERO ) xStat[basisVars[r]] = NONBASIS_L;
-					if ( Math.abs(x[basisVars[r]] - Infinity) < ZERO ) xStat[basisVars[r]] = NONBASIS_U;
+					if ( Math.abs(x[basisVars[r]] - 0.00000) < this.ZERO ) xStat[basisVars[r]] = NONBASIS_L;
+					if ( Math.abs(x[basisVars[r]] - Infinity) < this.ZERO ) xStat[basisVars[r]] = NONBASIS_U;
 				}
 
 				Cb[r] = isStageOne ? 0.0 : c[s];
@@ -282,7 +351,7 @@ var IlpSolver = {
 
 			} else {
 				// degenerate iteration
-				if ( xStat[s] == NONBASIS_L ) xStat[s] = NONBASIS_U;
+				if( xStat[s] == NONBASIS_L ) xStat[s] = NONBASIS_U;
 				else xStat[s] = NONBASIS_L;
 			}
 		}
@@ -292,13 +361,13 @@ var IlpSolver = {
 	copyModel: function(model) {
 		// copyModel: deeply copy the model
 
-		if (model == null || typeof(model) != 'object')
+		if(model == null || typeof(model) != 'object')
 			return model;
 
 		var newModel = new model.constructor();
 
-		for (var key in model)
-			newModel[key] = IlpSolver.copyModel(model[key]);
+		for(var key in model)
+			newModel[key] = this.copyModel(model[key]);
 
 		return newModel;
 	}
