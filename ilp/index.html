@@ -9,6 +9,10 @@
 
 <h1>ILP Solver</h1>
 <hr/>
+<b><a href="testcase.html">Click here to see some ILP examples provided by us</a></b>
+<p>You may click the SOLVE button twice if nothing returned.</p>
+<p>If errors still exist, please contact Bohan.</p>
+<hr/>
 <div ng-app="ilpInit" ng-controller="formCtrl">
   <form novalidate>
     Number of variables (n):<br>
@@ -17,15 +21,22 @@
     <input type="number" ng-model="m" id="m">
     <br><br>
     <button ng-click="set()">Set</button>
+
+    <br/>
   </form>
 </div>
 <hr/>
 <div id="ilp"></div>
-<hr/>
+
 <div id="rst"></div>
 
 <script>
 var M, N;
+
+var solve2 = function() {
+    solve();
+    solve();
+}
 
 var solve = function() {
 	var content = "";
@@ -94,7 +105,7 @@ var genMatForm = function(n, m){
 	}
 
 	content += "xi are non-negative integers<br><br>"
-	content += "<button onclick=\"solve()\">Solve</button><br>";
+	content += "<button onclick=\"solve()\">Solve</button><br><hr/>";
 
 	document.getElementById('ilp').innerHTML = content;
 }
