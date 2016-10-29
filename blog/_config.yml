@@ -7,13 +7,13 @@ title: Bohan Li's Blog
 subtitle:
 description:
 author: Bohan Li
-language:
+language: en
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://bohanli.net/blog
-root: /blog/
+#url: http://bhli04.github.io
+#root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 
